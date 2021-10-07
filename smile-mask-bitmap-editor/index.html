@@ -1,0 +1,64 @@
+<!-- https://szhu-bitmap-editor.glitch.me/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Hello!</title>
+
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="./style.css" />
+
+    <!-- import the webpage's javascript file -->
+    <!--     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script> -->
+    <script src="./script.js" defer></script>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="input-canvas" width="48" height="52"></canvas>
+      <form id="input-canvas-color">
+        <fieldset>
+          <legend>Color</legend>
+          <label>
+            <input type="radio" name="color" value="toggle" checked />
+            Toggle
+          </label>
+          <label>
+            <input type="radio" name="color" value="white" />
+            White
+          </label>
+          <label>
+            <input type="radio" name="color" value="black" />
+            Black
+          </label>
+        </fieldset>
+      </form>
+      <form id="input-canvas-size">
+        <fieldset>
+          <legend>Brush size</legend>
+          <label>
+            <input type="radio" name="size" value="2" checked />
+            2px
+          </label>
+          <label>
+            <input type="radio" name="size" value="10" />
+            10px
+          </label>
+        </fieldset>
+      </form>
+
+      <textarea id="input-c"></textarea>
+      <textarea id="input-ascii" readonly></textarea>
+    </div>
+
+    <!-- include the Glitch button to show what the webpage is about and
+          to make it easier for folks to view source and remix -->
+    <div
+      class="glitchButton"
+      style="position: fixed; top: 20px; right: 20px"
+    ></div>
+    <script src="https://button.glitch.me/button.js" defer></script>
+  </body>
+</html>

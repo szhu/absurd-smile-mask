@@ -1,0 +1,26 @@
+/* CSS files add styling rules to your content */
+
+body {
+  font-family: helvetica, arial, sans-serif;
+  margin: 2em;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  min-height: 40vh;
+  resize: vertical;
+  font-family: monospace;
+  white-space: pre;
+}
+
+#input-ascii {
+  font-size: 0.5em;
+  line-height: 1em;
+}
+
+#input-canvas {
+  zoom: 5;
+  image-rendering: pixelated;
+  filter: contrast(500);
+}
