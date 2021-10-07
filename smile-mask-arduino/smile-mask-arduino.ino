@@ -1,7 +1,24 @@
 #include "U8glib.h"
-#include "dht.h"
+//#include "dht.h"
+//#define dht_apin A0
 
-#define dht_apin A0
+////////
+// Designing the Absurd
+// Pedro Oliveira 2020/2021
+// IR Receiver
+
+#define DECODE_NEC
+#include "./PinDefinitionsAndMore.h"
+#include <Arduino.h>
+#include <IRremote.h>
+
+// constant for RGB LED pins
+const int rPin = 9;
+const int gPin = 5;
+const int bPin = 3;
+
+// Constant IR Receiver Pin (IR input)
+// Arduino Uno / Nano Every - pin 2
 
 // dht DHT;
 
@@ -40,13 +57,20 @@ const uint8_t brainy_bitmap[] PROGMEM = {
 
 void draw(void) {
   // graphic commands to redraw the complete screen should be placed here
+  u8g.drawBitmapP(37, 0, 6, 50, brainy_bitmap); // put bitmap
+
   u8g.setFont(u8g_font_unifont);
   u8g.setPrintPos(0, 20);
   // call procedure from base class, http://arduino.cc/en/Serial/Print
-  u8g.print("Hello World!");
+  u8g.print("Hi Joy!!");
 }
 
-void setup(void) {}
+void setup(void) {
+  Serial.begin(9600);
+  IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);
+  Serial.print("IR Receiver Pin: ");
+  Serial.println(IR_RECEIVE_PIN);
+}
 
 void loop(void) {
   //  DHT.read11(dht_apin);  // Read apin on DHT11
@@ -57,4 +81,29 @@ void loop(void) {
   } while (u8g.nextPage());
 
   delay(5000); // Delay of 5sec before accessing DHT11 (min - 2sec)
+
+  //////////////
+
+  if (IrReceiver.decode()) {
+
+    IrReceiver.printIRResultShort(&Serial);
+    IrReceiver.resume();
+
+    if (IrReceiver.decodedIRData.command == 0x8) {
+      Serial.println("RED");
+      rgb(255, 0, 0);
+    } else if (IrReceiver.decodedIRData.command == 0xB) {
+      Serial.println("BLUE");
+      rgb(0, 255, 0);
+    } else if (IrReceiver.decodedIRData.command == 0x7) {
+      Serial.println("BLUE");
+      rgb(0, 0, 255);
+    }
+  }
+}
+
+void rgb(int r, int g, int b) {
+  analogWrite(rPin, r);
+  analogWrite(gPin, g);
+  analogWrite(bPin, b);
 }
