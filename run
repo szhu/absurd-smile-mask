@@ -1,0 +1,96 @@
+#!/bin/bash
+set -e
+
+# PORT=(/dev/cu.usbserial*); BOARD=arduino:samd:nano_33_iot
+PORT=(/dev/cu.usbserial*); BOARD=arduino:avr:uno
+# PORT=(/dev/cu.usbserial-AB0MG9NA); BOARD=arduino:avr:nano; CPU=atmega328old
+
+DIR=$(dirname "$1")
+FILE_INO=$DIR/$(basename "$DIR").ino
+FILE_UPLOAD_TIMESTAMP="/tmp/arduino-last-upload-timestamp"
+
+if [[ ! -e $FILE_INO ]]; then
+    echo "There isn't a main sketch file at: $FILE_INO"
+    exit 1
+fi
+
+verbose() {
+    echo
+    echo -n "$ "
+    printf "%q " "$@"
+    echo
+    sleep 0.5
+    "$@"
+}
+
+port-help() {
+    echo "Invalid port. Running this command in case it helps:"
+    verbose arduino-cli board list
+    echo -n "Press Enter to try to upload anyway, or ^C to cancel."
+    read -r
+}
+
+upload-if-newer() {
+    local FQBN=$BOARD
+    if [[ -n $CPU ]]; then
+        FQBN="$BOARD:cpu=$CPU"
+    fi
+
+    local NEEDS_REUPLOAD=0
+    for file in "$DIR"/*; do
+        if [[ $file -nt $FILE_UPLOAD_TIMESTAMP ]]; then
+            NEEDS_REUPLOAD=1
+            break
+        fi
+    done
+
+
+    if [[ $NEEDS_REUPLOAD -eq 1  ]]; then
+        if [[ -n "${PORT[0]}" ]]; then
+            verbose arduino-cli compile --fqbn "$FQBN" --upload --port "$PORT" -- "$DIR"
+        else
+            verbose arduino-cli compile --fqbn "$FQBN" -- "$DIR"
+        fi
+        touch $FILE_UPLOAD_TIMESTAMP
+        echo "Finished upload."
+    else
+        echo "Skipping upload because no files have been updated."
+        echo "To force upload: rm $FILE_UPLOAD_TIMESTAMP"
+    fi
+}
+
+write-arduino-json() {
+    mkdir -p ".vscode"
+    {
+        printf '{\n'
+        printf '    "sketch": "%s",\n' "$FILE_INO"
+        printf '    "board": "%s",\n' "$BOARD"
+        if [[ -n $CPU ]]; then
+            printf '    "configuration": "cpu=%s",\n' "$CPU"
+        fi
+        printf '    "port": "%s"\n' "${PORT[0]}"
+        printf '}\n'
+    } > '.vscode/arduino.json'
+}
+
+serial-monitor() {
+    echo
+    echo "Starting serial monitor."
+    cat "$PORT"
+}
+
+main() {
+    clear
+
+    if [[ ! -e ${PORT[0]} ]]; then
+        port-help
+    fi
+
+    write-arduino-json
+
+    upload-if-newer
+
+    serial-monitor
+}
+
+main
