@@ -23,8 +23,11 @@ void loop() {
     return;
   }
 
+  Serial.print(IrReceiver.decodedIRData.command);
+  Serial.print(": ");
   IrReceiver.printIRResultShort(&Serial);
-  Serial.println(IrReceiver.decodedIRData.command);
+  hasUpdate = true;
+  lastCommand = IrReceiver.decodedIRData.command;
 
   IrReceiver.resume();
 }

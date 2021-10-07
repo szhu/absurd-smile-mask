@@ -4,12 +4,7 @@
 U8GLIB_SH1106_128X64 u8g(13, 11, 10, 9, 8);
 
 namespace Display {
-bool hasUpdates;
-
-void setup() {
-  hasUpdates = true;
-  //
-}
+void setup() {}
 
 const uint8_t brainy_bitmap[] PROGMEM = {
     0x00, 0x00, 0x03, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x07, 0xFC, 0x00, 0x00,
@@ -48,11 +43,12 @@ void draw(void) {
   u8g.setFont(u8g_font_unifont);
   u8g.setPrintPos(0, 20);
   // // call procedure from base class, http://arduino.cc/en/Serial/Print
-  u8g.print("3 Hi Joy!!");
+  u8g.print(lastCommand);
+  u8g.print(" Hi Joy!!");
 }
 
 void loop() {
-  if (!hasUpdates) {
+  if (!hasUpdate) {
     return;
   }
 
@@ -60,7 +56,7 @@ void loop() {
   do {
     draw();
   } while (u8g.nextPage());
-  hasUpdates = false;
+  hasUpdate = false;
 }
 
 }; // namespace Display
