@@ -62,7 +62,7 @@ void draw(void) {
   u8g.setFont(u8g_font_unifont);
   u8g.setPrintPos(0, 20);
   // call procedure from base class, http://arduino.cc/en/Serial/Print
-  u8g.print("Hi Joy!!");
+  u8g.print("2 Hi Joy!!");
 }
 
 void setup(void) {
@@ -72,18 +72,30 @@ void setup(void) {
   Serial.println(IR_RECEIVE_PIN);
 }
 
+bool hasUpdates = true;
+
 void loop(void) {
   //  DHT.read11(dht_apin);  // Read apin on DHT11
 
-  u8g.firstPage();
-  do {
-    draw();
-  } while (u8g.nextPage());
+  if (hasUpdates) {
+    u8g.firstPage();
+    do {
+      draw();
+    } while (u8g.nextPage());
+    hasUpdates = false;
+  }
 
-  delay(5000); // Delay of 5sec before accessing DHT11 (min - 2sec)
+  receive();
+  // for (int i = 0; i < 1000; i++) {
+  //   delay(5);
+  // }
+
+  // delay(5000); // Delay of 5sec before accessing DHT11 (min - 2sec)
 
   //////////////
+}
 
+void receive() {
   if (IrReceiver.decode()) {
 
     IrReceiver.printIRResultShort(&Serial);
