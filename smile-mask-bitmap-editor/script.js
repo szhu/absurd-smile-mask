@@ -1,13 +1,37 @@
 let inputC = document.querySelector("#input-c");
+let inputCCopy = document.querySelector("#input-c-copy");
 let inputAscii = document.querySelector("#input-ascii");
 let inputCanvas = document.querySelector("#input-canvas");
 let ctx = inputCanvas.getContext("2d");
 let inputCanvasColor = document.querySelector("#input-canvas-color").elements[
   "color"
 ];
-let inputCanvasSize = document.querySelector("#input-canvas-size").elements[
-  "size"
-];
+let inputCanvasSize =
+  document.querySelector("#input-canvas-size").elements["size"];
+
+let inputDimensionsW = document.querySelector("#input-dimensions-w");
+let inputDimensionsH = document.querySelector("#input-dimensions-h");
+let inputDimensions = {
+  get w() {
+    return +inputDimensionsW.value;
+  },
+  get h() {
+    return +inputDimensionsH.value;
+  },
+};
+
+function updateSize() {
+  inputCanvas.width = inputDimensions.w;
+  inputCanvas.height = inputDimensions.h;
+}
+
+inputDimensionsW.addEventListener("change", updateSize);
+inputDimensionsH.addEventListener("change", updateSize);
+
+inputCCopy.addEventListener("click", () => {
+  inputC.select();
+  document.execCommand("copy");
+});
 
 inputC.addEventListener("input", () => {
   fromC();
@@ -15,7 +39,7 @@ inputC.addEventListener("input", () => {
   toCanvas();
 });
 
-inputAscii.addEventListener("input", e => {
+inputAscii.addEventListener("input", (e) => {
   console.log(e.target.value);
 });
 
@@ -34,7 +58,7 @@ function drawAt({ e, x, y }) {
   ctx.fill(circle);
 }
 
-inputCanvas.addEventListener("pointerdown", e => {
+inputCanvas.addEventListener("pointerdown", (e) => {
   let { x, y } = getCanvasPosition(e);
   let colorOption = inputCanvasColor.value;
   let color = colorOption;
@@ -45,37 +69,37 @@ inputCanvas.addEventListener("pointerdown", e => {
   drawAt({ e, x, y });
 });
 
-inputCanvas.addEventListener("pointermove", e => {
+inputCanvas.addEventListener("pointermove", (e) => {
   if (e.buttons) {
     let { x, y } = getCanvasPosition(e);
     drawAt({ e, x, y });
   }
 });
-inputCanvas.addEventListener("touchmove", e => {
+inputCanvas.addEventListener("touchmove", (e) => {
   e.preventDefault();
 });
 
-inputCanvas.addEventListener("pointerleave", e => {
+inputCanvas.addEventListener("pointerleave", (e) => {
   fromCanvas();
   toAscii();
   toC();
 });
-inputCanvas.addEventListener("pointerup", e => {
+inputCanvas.addEventListener("pointerup", (e) => {
   fromCanvas();
   toAscii();
   toC();
 });
 
 // https://stackoverflow.com/a/62224531/782045
-const toBinString = bytes =>
+const toBinString = (bytes) =>
   bytes.reduce((str, byte) => str + byte.toString(2).padStart(8, "0"), "");
 
-const toBytes = binString =>
+const toBytes = (binString) =>
   Uint8Array.from(
     binString
       .split(/(.{8})/)
       .filter(Boolean)
-      .map(x => parseInt(x, 2))
+      .map((x) => parseInt(x, 2))
   );
 
 let bytes;
@@ -86,24 +110,23 @@ function toC() {
   for (let i = 0; i < bytes.length; i += 12) {
     rows.push(Array.from(bytes.slice(i, i + 12)));
   }
-  console.log(rows);
 
   inputC.value = [
     "{",
     rows
       .map(
-        row =>
+        (row) =>
           "    " +
           row
             .map(
               //
-              x => `0x${x.toString(16).padStart(2, 0)},`
+              (x) => `0x${x.toString(16).padStart(2, 0)},`
             )
             .join(" ")
       )
       .join("\n"),
 
-    "}"
+    "}",
   ].join("\n");
 }
 
@@ -115,7 +138,7 @@ function fromC() {
 
 function toAscii() {
   let ascii = binString
-    .split(/(.{48})/)
+    .split(new RegExp(`(.{${inputDimensions.w}})`))
     .filter(Boolean)
     .join("\n");
   inputAscii.value = ascii;
@@ -124,32 +147,21 @@ function toAscii() {
 function toCanvas() {
   let imageArray = Array.from(binString)
     .map(Number)
-    .flatMap(value => [value * 255, value * 255, value * 255, 255]);
+    .flatMap((value) => [value * 255, value * 255, value * 255, 255]);
 
-  let imageData = ctx.createImageData(48, 52);
+  let imageData = ctx.createImageData(inputDimensions.w, inputDimensions.h);
   imageData.data.set(imageArray);
   ctx.putImageData(imageData, 0, 0);
 }
 
 function fromCanvas() {
-  let imageData = ctx.getImageData(0, 0, 48, 52);
+  let imageData = ctx.getImageData(0, 0, inputDimensions.w, inputDimensions.h);
   binString = "";
   for (let i = 0; i < imageData.data.length; i += 4) {
     binString += imageData.data[i] > 128 ? "1" : "0";
   }
   bytes = toBytes(binString);
 }
-
-// function updateInputJs() {
-//   console.log(inputJs.value);
-//   let x = eval(inputJs.value.replace(/{/, "[").replace(/}/, "]"));
-//   window.x = x;
-//   let typedArray = Uint8Array.from(x);
-//   let binString = toBinString(typedArray);
-//   let ascii = binString.split(/(.{48})/).filter(Boolean).join("\n");
-//   inputAscii.value = ascii;
-
-// }
 
 inputC.value = `{
     0x00, 0x00, 0x03, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x07, 0xFC, 0x00, 0x00,

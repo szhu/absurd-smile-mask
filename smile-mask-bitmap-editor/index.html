@@ -17,7 +17,28 @@
   </head>
   <body>
     <div id="app">
-      <canvas id="input-canvas" width="48" height="52"></canvas>
+      <fieldset>
+        <legend>Dimensions</legend>
+        <input
+          id="input-dimensions-w"
+          class="dimension"
+          type="number"
+          placeholder="W"
+          value="48"
+        />
+        &times;
+        <input
+          id="input-dimensions-h"
+          class="dimension"
+          type="number"
+          placeholder="W"
+          value="52"
+        />
+      </fieldset>
+      <div class="canvas-wrapper">
+        <canvas id="input-canvas" width="48" height="52"></canvas>
+      </div>
+
       <form id="input-canvas-color">
         <fieldset>
           <legend>Color</legend>
@@ -38,18 +59,40 @@
       <form id="input-canvas-size">
         <fieldset>
           <legend>Brush size</legend>
-          <label>
-            <input type="radio" name="size" value="2" checked />
+          <input
+            id="input-canvas-size-slider"
+            type="range"
+            name="size"
+            min="1"
+            max="20"
+            value="2"
+            list="tickmarks"
+          />
+          <datalist id="tickmarks">
+            <option value="1"></option>
+            <option value="2"></option>
+            <option value="5"></option>
+            <option value="10"></option>
+            <option value="20"></option>
+          </datalist>
+          <button
+            type="button"
+            onclick="document.getElementById('input-canvas-size-slider').value = 2; "
+          >
             2px
-          </label>
-          <label>
-            <input type="radio" name="size" value="10" />
+          </button>
+          <button
+            type="button"
+            onclick="document.getElementById('input-canvas-size-slider').value = 10;"
+          >
             10px
-          </label>
+          </button>
         </fieldset>
       </form>
 
+      <button id="input-c-copy">Copy</button>
       <textarea id="input-c"></textarea>
+
       <textarea id="input-ascii" readonly></textarea>
     </div>
 
