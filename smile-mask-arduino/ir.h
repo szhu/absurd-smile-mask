@@ -23,11 +23,22 @@ void loop() {
     return;
   }
 
-  Serial.print(IrReceiver.decodedIRData.command);
-  Serial.print(": ");
   IrReceiver.printIRResultShort(&Serial);
-  hasUpdate = true;
-  lastCommand = IrReceiver.decodedIRData.command;
+
+  if (
+      // On the remote, most keys use the NEC protocol.
+      IrReceiver.decodedIRData.protocol == NEC ||
+      // The power button uses an unknown protocol and has rawDataPtr->rawlen
+      // 100. There are often stray signals, which look the same except they
+      // have a smaller rawlen.
+      (IrReceiver.decodedIRData.protocol == UNKNOWN &&
+       IrReceiver.decodedIRData.rawDataPtr->rawlen == 100)) {
+    Serial.print("Recognized command: ");
+    Serial.println(IrReceiver.decodedIRData.command);
+    Serial.println();
+    hasUpdate = true;
+    lastCommand = IrReceiver.decodedIRData.command;
+  }
 
   IrReceiver.resume();
 }
